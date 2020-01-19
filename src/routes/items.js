@@ -2,7 +2,7 @@ require('dotenv').config()
 const router = require('express').Router()
 const mysql = require('../dbconfig')
 const {auth,restaurant} = require('../middleware')
-const {detail,add,edit,dlt,showall} = require('../model/items')
+const {detail,detailcat,add,edit,dlt,showalllimit} = require('../model/items')
 const {name_item_asc,price_asc,rating_asc,updated_on_asc,name_item_desc
        ,price_desc,rating_desc,updated_on_desc}= require ('../model/items')
 
@@ -131,9 +131,17 @@ router.get('/desc',(req,res)=>{
 /*=================================================================================================================================================*/
 
 /* SHOW ALL ITEM */
-router.get('/showall', (req,res)=>{
-    mysql.execute(showall, [], (err, result, field)=>{
+router.get('/showalllimit', (req,res)=>{
+    mysql.execute(showalllimit, [], (err, result, field)=>{
         res.send({data:result})
+    })
+})
+
+router.get('/category/:id',(req, res)=>{
+    const {id} = req.params
+    mysql.execute(detailcat,[id],(err,result, field)=>{
+        console.log(err)
+        res.send({succes:true,data:result})
     })
 })
 
@@ -142,11 +150,11 @@ router.get('/:id',(req, res)=>{
       const {id} = req.params
         mysql.execute(detail,[id],(err,result1, field)=>{
             const name_category = result1[0].name_category
-            const sql = `SELECT items.name_item,categories.name_category ,restaurants.name_rest,  
+            const sql = `SELECT items.id_item, items.name_item,categories.name_category ,restaurants.name_rest,  
             items.rating, items.image, items.price, items.desc_item, items.created_on FROM items 
             INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant 
             INNER JOIN categories ON items.id_category=categories.id_category 
-            WHERE name_category LIKE ?`
+            WHERE name_category LIKE ? ORDER BY rating DESC`
             mysql.execute(sql, ['%'+name_category+'%'],(err,result, field)=>{
                 res.send({succes:true,
                     data:result1,
@@ -156,7 +164,7 @@ router.get('/:id',(req, res)=>{
 })
 
 /* ADD DATA ITEM */
-router.post('/',auth,restaurant,upload.single('image'),(req,res)=>{
+router.post('/',upload.single('image'),(req,res)=>{
     const image = (req.file.filename)
     const {id_category,id_restaurant,name_item,price,desc_item} =req.body
     const created_on = new Date()

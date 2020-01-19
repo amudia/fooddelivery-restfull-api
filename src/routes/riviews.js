@@ -2,7 +2,14 @@ require('dotenv').config()
 const router = require('express').Router()
 const mysql = require('../dbconfig')
 const {auth,customer} = require('../middleware')
-const {add,edit} = require('../model/riviews')
+const {add,edit, detail} = require('../model/riviews')
+
+router.get('/:id',(req, res)=>{
+    const {id} = req.params
+    mysql.execute(detail,[id],(err,result, field)=>{
+        res.send({succes:true,data:result})
+    })
+})
 
 /* ADD DATA */
 router.post('/',auth,customer,(req,res)=>{

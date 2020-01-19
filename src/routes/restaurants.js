@@ -32,13 +32,13 @@ const upload = multer({
 router.get('/menu/:id', (req,res)=>{
     const {id} = req.params
     mysql.execute(menu, [id], (err, result, field)=>{
-        res.send({id_rest : id,
-            items:result})
+        res.send({succes:true,
+            data:result})
     })
 })
 
 /* GET DATA */
-router.get('/:id',auth,(req, res)=>{
+router.get('/:id',(req, res)=>{
     const {id} = req.params
     mysql.execute(detail,[id],(err,result, field)=>{
         res.send({succes:true,data:result})
@@ -53,7 +53,7 @@ router.get('/',(req, res)=>{
 })
 
 /*ADD DATA*/
-router.post('/',auth,restaurant,upload.single('logo'),(req,res)=>{
+router.post('/',upload.single('logo'),(req,res)=>{
     const logo = (req.file.filename)
     const {name_rest,lat,longt,desc_rest} =req.body
     const created_on = new Date()
