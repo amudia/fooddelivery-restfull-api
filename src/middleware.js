@@ -38,7 +38,7 @@ const auth = (req,res,next)=>{
 
 const admin = (req,res,next)=>{
     const {id_role} = req.headers
-    if(id_role == '1'){
+    if(id_role == '1'|| id_role == '2'|| id_role == '3'){
         next()
     }else{
         res.send({success:false,msg:'Access Denied'})

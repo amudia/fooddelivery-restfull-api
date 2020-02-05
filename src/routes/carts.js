@@ -12,7 +12,7 @@ const {detailcust,add,edit,dlt} = require('../model/carts')
 //     })
 // })
 
-router.get('/:id',auth,customer,(req,res)=>{
+router.get('/:id',auth,(req,res)=>{
 	const {id} = req.params
 	mysql.execute('SELECT items.price, carts.total_item FROM carts INNER JOIN items on carts.id_item=items.id_item WHERE id_user=?',[id],(err,result1,field)=>{
 		mysql.query('SELECT COUNT(items.price) AS count FROM carts INNER JOIN items on carts.id_item=items.id_item WHERE id_user=?',[id],(err,result,field)=>{

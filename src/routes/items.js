@@ -2,7 +2,7 @@ require('dotenv').config()
 const router = require('express').Router()
 const mysql = require('../dbconfig')
 const {auth,restaurant} = require('../middleware')
-const {detail,detailcat,add,edit,dlt,showalllimit} = require('../model/items')
+const {detail,detailcat,add,edit,dlt,showalllimit, showall} = require('../model/items')
 const {name_item_asc,price_asc,rating_asc,updated_on_asc,name_item_desc
        ,price_desc,rating_desc,updated_on_desc}= require ('../model/items')
 
@@ -133,6 +133,11 @@ router.get('/desc',(req,res)=>{
 /* SHOW ALL ITEM */
 router.get('/showalllimit', (req,res)=>{
     mysql.execute(showalllimit, [], (err, result, field)=>{
+        res.send({data:result})
+    })
+})
+router.get('/', (req,res)=>{
+    mysql.execute(showall, [], (err, result, field)=>{
         res.send({data:result})
     })
 })

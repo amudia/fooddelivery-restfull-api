@@ -11,7 +11,6 @@ router.post('/login',(req,res)=>{
     const {username,password}=req.body
     const users = 'SELECT * FROM users WHERE username=?'
     mysql.execute(users,[username], (err,result,field)=>{
-        const roles = result[0].id_role
         console.log(result)
         if(result.length>0){
             if(bcrypt.compareSync(password,result[0].password)){
@@ -24,9 +23,7 @@ router.post('/login',(req,res)=>{
                 mysql.execute(revoked, [token,is_revoked,created_on,updated_on], (err, result, field)=>{
                     res.send({
                         success: true,
-                        msg: result,
-                        token: auth,
-                        data:roles
+                        auth,
                     })
                 })           
             }else{
@@ -45,11 +42,11 @@ router.post('/login',(req,res)=>{
 })
 
 /* LOGOUT */
-router.put('/logout', auth,(req, res)=>{
+router.get('/logout', auth,(req, res)=>{
     const token = req.headers.auth_token
-    const is_revoked = 1
-    const sql = 'UPDATE revoked_token SET is_revoked=? where token=?'
-    mysql.execute(sql, [is_revoked, token], (err, result, field)=>{
+    // const is_revoked = 1
+    const sql = 'UPDATE revoked_token SET is_revoked=1 where token=?'
+    mysql.execute(sql, [ token], (err, result, field)=>{
         res.send({
             result,
             msg:req.headers.auth_token
