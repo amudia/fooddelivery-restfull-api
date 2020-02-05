@@ -14,7 +14,9 @@ router.post('/login',(req,res)=>{
         console.log(result)
         if(result.length>0){
             if(bcrypt.compareSync(password,result[0].password)){
-                const auth = jwt.sign({username},process.env.APP_KEY)
+                const roles = result[0].id_role
+                const id = result[0].id_user
+                const auth = jwt.sign({username, id, roles},process.env.APP_KEY)
                 const token = auth
                 const is_revoked = 0
                 const created_on = new Date()
@@ -49,6 +51,7 @@ router.get('/logout', auth,(req, res)=>{
     mysql.execute(sql, [ token], (err, result, field)=>{
         res.send({
             result,
+            success:true,
             msg:req.headers.auth_token
         })
 

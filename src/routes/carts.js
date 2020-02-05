@@ -22,7 +22,7 @@ router.get('/:id',auth,(req,res)=>{
 				var total = result1[i].price * result1[i].total_item
 				subtotal += total;
 			}
-			mysql.execute('SELECT users.name, items.name_item, items.price, carts.total_item, items.rating, restaurants.name_rest FROM carts INNER JOIN items ON carts.id_item=items.id_item INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant  INNER JOIN users ON carts.id_user=users.id_user WHERE carts.id_user=?',[id],(err,result1,field)=>{
+			mysql.execute('SELECT users.name,items.image, items.name_item, items.price, carts.total_item, items.rating, restaurants.name_rest FROM carts INNER JOIN items ON carts.id_item=items.id_item INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant  INNER JOIN users ON carts.id_user=users.id_user WHERE carts.id_user=?',[id],(err,result1,field)=>{
                 res.send({success:true,data:result1, Subtotal: subtotal})
 			})
 		}) 
