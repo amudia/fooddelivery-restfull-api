@@ -67,6 +67,16 @@ router.get('/:id',auth,admin,(req, res)=>{
     })
 })
 
+/* FORGOT PASWORD */
+router.put('/forgotpassword', (req, res) => {
+    const {username, password} = req.body
+    const enc_pass = bcrypt.hashSync(password)
+    const sql = `UPDATE users SET password = ? where username = ?`
+    mysql.execute(sql, [enc_pass, username], (err, result, field) => {
+        res.send({succcess: true, data: result})
+    })
+})
+
 /* REGISTER USER #ADMIN ACCESS */
 router.post('/',(req,res)=>{
     const {name,username,password,id_role} =req.body

@@ -161,7 +161,7 @@ router.get('/:id',(req, res)=>{
             INNER JOIN categories ON items.id_category=categories.id_category 
             WHERE name_category LIKE ? ORDER BY rating DESC`
             mysql.execute(sql, ['%'+name_category+'%'],(err,result, field)=>{
-                res.send({succes:true,
+                res.send({success:true,
                     data:result1,
                     suggest:result})
             })

@@ -31,7 +31,7 @@ router.get('/:id',auth,(req,res)=>{
 })
 
 /*ADD CART*/
-router.post('/',auth,customer,(req,res)=>{
+router.post('/',auth,(req,res)=>{
     const {id_item,id_user,total_item} =req.body
     const created_on = new Date()
     const updated_on = new Date()
@@ -39,7 +39,7 @@ router.post('/',auth,customer,(req,res)=>{
         [id_item,id_user,total_item, created_on,updated_on],
         (err,result,field)=>{
             console.log(err)
-        res.send({succes:true,data:result})
+        res.send({success:true,data:result})
     })
 })
 
