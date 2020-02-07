@@ -59,11 +59,11 @@ router.get('/logout', auth,(req, res)=>{
 })
 
 /* GET DETAIL USER */
-router.get('/:id',auth,admin,(req, res)=>{
+router.get('/:id',auth,(req, res)=>{
     const {id} = req.params
     mysql.execute(detail,[id],(err,result, field)=>{
         console.log(err)
-        res.send({succes:true,data:result})
+        res.send({success:true,data:result})
     })
 })
 
@@ -123,13 +123,14 @@ router.post('/register/restaurant',(req,res)=>{
 router.post('/register/customer',(req,res)=>{
     const {name,username,password} =req.body
     const enc_pass = bcrypt.hashSync(password)
+    const photo = 'https://image.flaticon.com/icons/png/512/145/145843.png'
     const created_on = new Date()
     const updated_on = new Date()
     const sql = `SELECT username from users WHERE username =?`
     mysql.execute(sql, [username], (err,result1, field)=>{
         if(result1 == ''){
             mysql.execute(add,
-                [name,username,enc_pass,'3',created_on,updated_on],
+                [name,username,enc_pass, photo,'3',created_on,updated_on],
                 (err,result,field)=>{
                 res.send({success:true,msg:'Success'})
             })
@@ -176,18 +177,40 @@ router.put('/edit/restaurant/:id',auth,restaurant,(req,res)=>{
     })
 })
 
+/* UPLOAD FILE */
+const multer = require ('multer')
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, './src/assets/images/');
+    },
+    filename: function(req, file, cb){
+        cb(null, file.originalname);
+    }
+})
+const fileFilter = (req, file, cb)=>{
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+        cb(null, true)
+    }else{
+        cb(null, false)
+    }
+}
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter
+})
+
 /* EDIT DATA USER #CUSTOMER ACCESS */
-router.put('/edit/customer/:id',auth,customer,(req,res)=>{
+router.put('/edit/customer/:id',auth,upload.single('photo'),(req,res)=>{
+    const photo = process.env.APP_URI.concat('src/assets/'+req.file.filename)
     const {name,username,password} =req.body
     const {id} = req.params
-    const enc_pass = bcrypt.hashSync(password)
     const updated_on = new Date()
 
     const sql = `SELECT username from users WHERE username =?`
     mysql.execute(sql, [username], (err,result1, field)=>{
         if(result1 == ''){
             mysql.execute(edit,
-                [name,username,enc_pass,'3',updated_on,id],
+                [name,username,photo,updated_on,id],
                 (err,result,field)=>{
                 res.send({success:true,msg:'Update Success'})
             })
