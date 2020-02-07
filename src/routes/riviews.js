@@ -11,33 +11,64 @@ router.get('/:id',(req, res)=>{
     })
 })
 
-/* ADD DATA */
-router.post('/',auth,customer,(req,res)=>{
-    const {id_item,id_user,riview,rating} =req.body
+router.post('/',auth,(req,res)=>{
+    const {rating,riview, id_user,id_item} = req.body
     const created_on = new Date()
     const updated_on = new Date()
-    mysql.execute(add, [id_item,id_user,riview,rating,created_on,updated_on], (err,result,field)=>{
-        if(err) {
-            res.send(err)
-        }else{
-            const avgrate ='SELECT AVG(rating) AS rate FROM riviews WHERE id_item=?'
-            mysql.execute(avgrate,[id_item],(err0,result0,field0)=>{
-                if(err0){
-                    res.send({data:err0, msg: 'error 1'})
-                }else{
-                    const ratingavg = `UPDATE items SET rating=? WHERE id_item=?`
-                    mysql.execute(ratingavg, [result0[0].rate, id_item],(err2,res2,field2)=>{
-                        if(err){
-                            res.send({data:err2, msg: 'error 2'})
-                        }else{
-                            res.send({data:result0[0].rate, msg:'Succes'})
+    const sql = `INSERT INTO riviews (id_item, id_user,riview, rating, created_on,updated_on) VALUES (?,?,?,?,?,?)`
+    mysql.execute(sql, [id_item,id_user,riview,rating,created_on,updated_on], (err, result0, field)=>{
+        // res.send({success: true, data: result0})
+        console.log(err)
+        if(err == null){
+            const sql = `SELECT AVG(rating) AS rate from riviews WHERE id_item = ${id_item}`
+            mysql.execute(sql, [], (err1, result, field)=>{
+                var rating = result[0].rate
+                console.log(id_user)
+                console.log(err1)
+                if(err1 == null){
+                    const sql = `UPDATE items set rating = ${result[0].rate} WHERE id_item = ${id_item} `
+                    mysql.execute(sql, [rating], (err2, result1, field)=>{
+                        console.log(err2)
+                        if(err2 == null){
+                            const sql = `DELETE from carts WHERE id_item = ${id_item} AND id_user = ${id_user}`
+                            mysql.execute(sql, [id_item, id_user], (err, result2, field) =>{
+                                res.send({success: true, result2})
+                            } )
                         }
+                        
                     })
                 }
             })
-        }
+        } 
     })
 })
+/* ADD DATA */
+// router.post('/',auth,customer,(req,res)=>{
+//     const {id_item,id_user,riview,rating} =req.body
+//     const created_on = new Date()
+//     const updated_on = new Date()
+//     mysql.execute(add, [id_item,id_user,riview,rating,created_on,updated_on], (err,result,field)=>{
+//         if(err) {
+//             res.send(err)
+//         }else{
+//             const avgrate ='SELECT AVG(rating) AS rate FROM riviews WHERE id_item=?'
+//             mysql.execute(avgrate,[id_item],(err0,result0,field0)=>{
+//                 if(err0){
+//                     res.send({data:err0, msg: 'error 1'})
+//                 }else{
+//                     const ratingavg = `UPDATE items SET rating=? WHERE id_item=?`
+//                     mysql.execute(ratingavg, [result0[0].rate, id_item],(err2,res2,field2)=>{
+//                         if(err){
+//                             res.send({data:err2, msg: 'error 2'})
+//                         }else{
+//                             res.send({data:result0[0].rate, msg:'Succes'})
+//                         }
+//                     })
+//                 }
+//             })
+//         }
+//     })
+// })
 
 /* EDIT DATA */
 router.put('/:id',auth,customer,(req,res)=>{

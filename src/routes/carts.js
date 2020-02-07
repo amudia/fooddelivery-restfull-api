@@ -30,6 +30,22 @@ router.get('/:id',auth,(req,res)=>{
 	
 })
 
+/* CHECKOUT */
+router.put('/checkout/:id',(req,res)=>{
+    const {id} = req.params
+    const is_checkout = 1
+    const updated_on = new Date()
+    const sql = `UPDATE carts set is_checkout=?, updated_on=? WHERE id=?`
+    mysql.execute(sql,[is_checkout,updated_on,id_cart],(err,result,field)=>{
+        if (err) {
+            console.log(err)
+        } else {
+            res.send({ success: true, data: result, msg: "Check Out Successfull", })
+        }
+    })
+})
+
+
 /*ADD CART*/
 router.post('/',auth,(req,res)=>{
     const {id_item,id_user,total_item} =req.body
