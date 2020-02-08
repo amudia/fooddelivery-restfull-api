@@ -2,10 +2,10 @@ require('dotenv').config()
 const router = require('express').Router()
 const mysql = require('../dbconfig')
 const {auth,restaurant} = require('../middleware')
-const {detail,detailcat,add,edit,dlt,showalllimit, showall} = require('../model/items')
+const {count,get,detail,detailcat,add,edit,dlt,showalllimit, showall} = require('../model/items')
 const {name_item_asc,price_asc,rating_asc,updated_on_asc,name_item_desc
        ,price_desc,rating_desc,updated_on_desc}= require ('../model/items')
-
+const url = process.env.APP_URI;
 
 /* UPLOAD FILE */
 const multer = require ('multer')
@@ -136,11 +136,186 @@ router.get('/showalllimit', (req,res)=>{
         res.send({data:result})
     })
 })
-router.get('/', (req,res)=>{
-    mysql.execute(showall, [], (err, result, field)=>{
-        res.send({data:result})
-    })
-})
+
+router.get('/', (req, res) => {
+    const { query } = req;
+    let where = '';
+    let sort = '';
+    let page = 'LIMIT 8 OFFSET 0';
+    let fullUrl = '';
+  
+    if (query.search) {
+      let count = 1;
+      where += 'WHERE';
+      Object.keys(query.search).forEach((key) => {
+        if (Object.keys(query.search).length === 1) {
+          where += ` items.${key} LIKE '%${query.search[key]}%'`;
+          fullUrl += `search[${key}]=${query.search[key]}&`;
+          count += 1;
+        } else if (Object.keys(query.search).length === count) {
+          where += ` items.${key} LIKE '%${query.search[key]}%'`;
+          fullUrl += `search[${key}]=${query.search[key]}&`;
+          count += 1;
+        } else {
+          where += ` items.${key} LIKE '%${query.search[key]}%' AND`;
+          fullUrl += `search[${key}]=${query.search[key]}&`;
+          count += 1;
+        }
+      });
+    }
+  
+    if (query.sort) {
+      if (Object.keys(query.sort).length === 1) {
+        sort += 'ORDER BY';
+        Object.keys(query.sort).forEach((key) => {
+          sort += ` items.${key} ${query.sort[key]}`;
+          fullUrl += `sort[${key}]=${query.sort[key]}&`;
+        });
+      }
+    }
+  
+    if (query.page) {
+      const offset = (Number(query.page) * 8) - 8;
+      page = `LIMIT 6 OFFSET ${offset}`;
+      fullUrl += `page=${query.page}&`;
+    } else {
+      query.page = 1;
+    }
+  
+    const sql1 = `${count} ${where}`;
+  
+    const sql2 = `${get} ${where} ${sort} ${page}`;
+  
+    mysql.execute(sql1, (err, result) => {
+      if (err) {
+        res.send({
+          status: 400,
+          msg: err,
+        });
+      } else if (result.length === 0) {
+        res.send({
+          status: 400,
+          msg: 'No data retrieved!',
+        });
+      } else {
+        mysql.execute(sql2, (err2, res2) => {
+          if (err2) {
+            res.send({
+              status: 400,
+              msg: err2,
+            });
+          } else if (res2.length === 0) {
+            res.send({
+              status: 400,
+              msg: 'No data retrieved!',
+            });
+          } else {
+            let prev = '';
+            let next = '';
+  
+            const noPage = fullUrl.replace(/page=[0-9\.]+&/g, '');
+  
+            prev = `${url}items?${noPage}page=${Number(query.page) - 1}`;
+            next = `${url}items?${noPage}page=${Number(query.page) + 1}`;
+  
+            if (Number(query.page) === Math.ceil(Number(result[0].result) / 8)) {
+              prev = `${url}items?${noPage}page=${Number(query.page) - 1}`;
+              next = '';
+              const regex = /page=0/g;
+              if (prev.match(regex)) {
+                prev = '';
+                next = '';
+              }
+            } else if (query.page <= 1) {
+              prev = '';
+              next = `${url}items?${noPage}page=${Number(query.page) + 1}`;
+            }
+  
+            res.send({
+              
+              status: 200,
+              info: {
+                count: result[0].result,
+                pages: Math.ceil(Number(result[0].result) / 8),
+                current: `${url}items?${fullUrl}`,
+                next,
+                previous: prev,
+              },
+              data: res2,
+            });
+          }
+        });
+      }
+    });
+  });
+  
+  router.get('/:id', (req, res) => {
+    const { id } = req.params;
+  
+    const sql = 'SELECT restaurants.name, items.name AS item, items.id, categories.name AS category, categories.id AS category_id, users.username AS created_by, items.price, items.description, items.total_ratings, items.images, items.date_created, items.date_updated FROM items INNER JOIN restaurants ON items.restaurant = restaurants.id INNER JOIN categories ON items.category = categories.id INNER JOIN users ON items.created_by = users.id WHERE items.id = ?';
+  
+    mysql.execute(
+      sql, [id],
+      (err1, result1) => {
+        if (err1) {
+          console.log(err1);
+          res.send({
+            
+            status: 400,
+            msg: err1,
+          });
+        } else if (result1.length === 0) {
+          res.send({
+            
+            status: 400,
+            msg: 'No data retrieved!',
+          });
+        } else {
+          const related = result1[0].category_id;
+          const recommended = `SELECT restaurants.name, items.name AS item, categories.name AS category, categories.id AS category_id, users.username AS created_by, items.price, items.description, items.total_ratings, items.images, items.date_created, items.date_updated 
+                  FROM items INNER JOIN restaurants ON items.restaurant = restaurants.id INNER JOIN categories ON items.category = categories.id INNER JOIN users ON items.created_by = users.id 
+                  WHERE category = ? ORDER BY total_ratings DESC LIMIT 3`;
+  
+          mysql.execute(recommended, [related], (err2, result2) => {
+            if (err2) {
+              console.log(err2);
+              res.send({
+                
+                status: 400,
+                msg: err2,
+              });
+            } else {
+              const review = 'SELECT review.review, users.username, items.name, review.ratings FROM review INNER JOIN users ON review.user = users.id INNER JOIN items ON review.item = items.id WHERE item = ? ORDER BY review.updated_on DESC LIMIT 5';
+              mysql.execute(review, [req.params.id], (err3, res3) => {
+                if (err3) {
+                  console.log(err2);
+                  res.send({
+                    
+                    status: 400,
+                    msg: err3,
+                  });
+                } else {
+                  res.send({
+                    
+                    status: 200,
+                    data: result1,
+                    reviews: res3,
+                    showcase: result2,
+                  });
+                }
+              });
+            }
+          });
+        }
+      },
+    );
+  });
+  
+// router.get('/', (req,res)=>{
+//     mysql.execute(showall, [], (err, result, field)=>{
+//         res.send({data:result})
+//     })
+// })
 
 router.get('/category/:id',(req, res)=>{
     const {id} = req.params
