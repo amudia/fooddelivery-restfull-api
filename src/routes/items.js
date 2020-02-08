@@ -249,67 +249,67 @@ router.get('/', (req, res) => {
     });
   });
   
-  router.get('/:id', (req, res) => {
-    const { id } = req.params;
+  // router.get('/:id', (req, res) => {
+  //   const { id } = req.params;
   
-    const sql = 'SELECT restaurants.name, items.name AS item, items.id, categories.name AS category, categories.id AS category_id, users.username AS created_by, items.price, items.description, items.total_ratings, items.images, items.date_created, items.date_updated FROM items INNER JOIN restaurants ON items.restaurant = restaurants.id INNER JOIN categories ON items.category = categories.id INNER JOIN users ON items.created_by = users.id WHERE items.id = ?';
+  //   const sql = 'SELECT restaurants.name, items.name AS item, items.id, categories.name AS category, categories.id AS category_id, users.username AS created_by, items.price, items.description, items.total_ratings, items.images, items.date_created, items.date_updated FROM items INNER JOIN restaurants ON items.restaurant = restaurants.id INNER JOIN categories ON items.category = categories.id INNER JOIN users ON items.created_by = users.id WHERE items.id = ?';
   
-    mysql.execute(
-      sql, [id],
-      (err1, result1) => {
-        if (err1) {
-          console.log(err1);
-          res.send({
+  //   mysql.execute(
+  //     sql, [id],
+  //     (err1, result1) => {
+  //       if (err1) {
+  //         console.log(err1);
+  //         res.send({
             
-            status: 400,
-            msg: err1,
-          });
-        } else if (result1.length === 0) {
-          res.send({
+  //           status: 400,
+  //           msg: err1,
+  //         });
+  //       } else if (result1.length === 0) {
+  //         res.send({
             
-            status: 400,
-            msg: 'No data retrieved!',
-          });
-        } else {
-          const related = result1[0].category_id;
-          const recommended = `SELECT restaurants.name, items.name AS item, categories.name AS category, categories.id AS category_id, users.username AS created_by, items.price, items.description, items.total_ratings, items.images, items.date_created, items.date_updated 
-                  FROM items INNER JOIN restaurants ON items.restaurant = restaurants.id INNER JOIN categories ON items.category = categories.id INNER JOIN users ON items.created_by = users.id 
-                  WHERE category = ? ORDER BY total_ratings DESC LIMIT 3`;
+  //           status: 400,
+  //           msg: 'No data retrieved!',
+  //         });
+  //       } else {
+  //         const related = result1[0].category_id;
+  //         const recommended = `SELECT restaurants.name, items.name AS item, categories.name AS category, categories.id AS category_id, users.username AS created_by, items.price, items.description, items.total_ratings, items.images, items.date_created, items.date_updated 
+  //                 FROM items INNER JOIN restaurants ON items.restaurant = restaurants.id INNER JOIN categories ON items.category = categories.id INNER JOIN users ON items.created_by = users.id 
+  //                 WHERE category = ? ORDER BY total_ratings DESC LIMIT 3`;
   
-          mysql.execute(recommended, [related], (err2, result2) => {
-            if (err2) {
-              console.log(err2);
-              res.send({
+  //         mysql.execute(recommended, [related], (err2, result2) => {
+  //           if (err2) {
+  //             console.log(err2);
+  //             res.send({
                 
-                status: 400,
-                msg: err2,
-              });
-            } else {
-              const review = 'SELECT review.review, users.username, items.name, review.ratings FROM review INNER JOIN users ON review.user = users.id INNER JOIN items ON review.item = items.id WHERE item = ? ORDER BY review.updated_on DESC LIMIT 5';
-              mysql.execute(review, [req.params.id], (err3, res3) => {
-                if (err3) {
-                  console.log(err2);
-                  res.send({
+  //               status: 400,
+  //               msg: err2,
+  //             });
+  //           } else {
+  //             const review = 'SELECT review.review, users.username, items.name, review.ratings FROM review INNER JOIN users ON review.user = users.id INNER JOIN items ON review.item = items.id WHERE item = ? ORDER BY review.updated_on DESC LIMIT 5';
+  //             mysql.execute(review, [req.params.id], (err3, res3) => {
+  //               if (err3) {
+  //                 console.log(err2);
+  //                 res.send({
                     
-                    status: 400,
-                    msg: err3,
-                  });
-                } else {
-                  res.send({
+  //                   status: 400,
+  //                   msg: err3,
+  //                 });
+  //               } else {
+  //                 res.send({
                     
-                    status: 200,
-                    data: result1,
-                    reviews: res3,
-                    showcase: result2,
-                  });
-                }
-              });
-            }
-          });
-        }
-      },
-    );
-  });
+  //                   status: 200,
+  //                   data: result1,
+  //                   reviews: res3,
+  //                   showcase: result2,
+  //                 });
+  //               }
+  //             });
+  //           }
+  //         });
+  //       }
+  //     },
+  //   );
+  // });
   
 // router.get('/', (req,res)=>{
 //     mysql.execute(showall, [], (err, result, field)=>{
@@ -347,10 +347,11 @@ router.get('/:id',(req, res)=>{
 router.post('/',upload.single('image'),(req,res)=>{
     const image = (req.file.filename)
     const {id_category,id_restaurant,name_item,price,desc_item} =req.body
+    const rating = 0
     const created_on = new Date()
     const updated_on = new Date()
     mysql.execute(add,
-        [id_category,id_restaurant,name_item,price,desc_item,image, created_on,updated_on],
+        [id_category,id_restaurant,name_item,price,desc_item,image,rating, created_on,updated_on],
         (err,result,field)=>{
         res.send({succes:true,data:result})
     })

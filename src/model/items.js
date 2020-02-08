@@ -1,12 +1,12 @@
 const detail = 'SELECT items.id_item,items.name_item,categories.name_category ,restaurants.name_rest,  items.rating, items.image, items.price, items.desc_item, items.created_on FROM items INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant INNER JOIN categories ON items.id_category=categories.id_category WHERE items.id_item=?'
 const detailcat = 'SELECT items.id_item,items.name_item,categories.name_category ,restaurants.name_rest,  items.rating, items.image, items.price, items.desc_item, items.created_on FROM items INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant INNER JOIN categories ON items.id_category=categories.id_category WHERE items.id_category=?'
-const add = 'INSERT INTO items (id_category, id_restaurant, name_item, price, desc_item,image, created_on,updated_on) VALUES (?,?,?,?,?,?,?,?)'
+const add = 'INSERT INTO items (id_category, id_restaurant, name_item, price, desc_item,image,rating, created_on,updated_on) VALUES (?,?,?,?,?,?,?,?,?)'
 const edit = `UPDATE items SET id_category=?, id_restaurant=?, name_item=?, price=?, desc_item=?, image=?, updated_on=? WHERE id_item=?`
 const dlt = 'DELETE FROM items where id_item=?'
 const showalllimit = `SELECT items.id_item,items.name_item,restaurants.name_rest, items.price, items.image, items.rating FROM items INNER JOIN restaurants ON restaurants.id_restaurant=items.id_restaurant LIMIT 5`
 const showall = `SELECT items.id_item,items.name_item,restaurants.name_rest, items.price, items.image, items.rating FROM items INNER JOIN restaurants ON restaurants.id_restaurant=items.id_restaurant`
 const count = 'SELECT COUNT(*) AS result FROM items'
-const get = `SELECT items.id_item,items.name_item,restaurants.name_rest, items.price, items.image, items.rating FROM items INNER JOIN restaurants ON restaurants.id_restaurant=items.id_restaurant`
+const get = `SELECT items.id_item,items.name_item,categories.name_category ,restaurants.name_rest,  items.rating, items.image, items.price, items.desc_item, items.created_on FROM items INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant INNER JOIN categories ON items.id_category=categories.id_category`
 
 const name_item_asc = `SELECT items.name_item,restaurants.name_rest, items.image, items.rating, items.price FROM restaurants INNER JOIN items ON items.id_restaurant=restaurants.id_restaurant ORDER BY name_item ASC`
 const price_asc = `SELECT items.name_item,restaurants.name_rest, items.image, items.rating, items.price FROM restaurants INNER JOIN items ON items.id_restaurant=restaurants.id_restaurant ORDER BY price ASC`
