@@ -6,7 +6,7 @@ const dlt = 'DELETE FROM items where id_item=?'
 const showalllimit = `SELECT items.id_item,items.name_item,restaurants.name_rest, items.price, items.image, items.rating FROM items INNER JOIN restaurants ON restaurants.id_restaurant=items.id_restaurant LIMIT 5`
 const showall = `SELECT items.id_item,items.name_item,restaurants.name_rest, items.price, items.image, items.rating FROM items INNER JOIN restaurants ON restaurants.id_restaurant=items.id_restaurant`
 const count = 'SELECT COUNT(*) AS result FROM items'
-const get = `SELECT items.id_item,items.name_item,categories.name_category ,restaurants.name_rest,  items.rating, items.image, items.price, items.desc_item, items.created_on FROM items INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant INNER JOIN categories ON items.id_category=categories.id_category`
+const get = `SELECT items.id_item,items.name_item,categories.name_category, categories.id_category ,restaurants.name_rest,  items.rating, items.image, items.price, items.desc_item, items.created_on FROM items INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant INNER JOIN categories ON items.id_category=categories.id_category`
 
 const name_item_asc = `SELECT items.name_item,restaurants.name_rest, items.image, items.rating, items.price FROM restaurants INNER JOIN items ON items.id_restaurant=restaurants.id_restaurant ORDER BY name_item ASC`
 const price_asc = `SELECT items.name_item,restaurants.name_rest, items.image, items.rating, items.price FROM restaurants INNER JOIN items ON items.id_restaurant=restaurants.id_restaurant ORDER BY price ASC`

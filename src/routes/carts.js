@@ -22,7 +22,7 @@ router.get('/:id',auth,(req,res)=>{
 				var total = result1[i].price * result1[i].total_item
 				subtotal += total;
 			}
-			mysql.execute('SELECT users.name,items.image,items.id_item, items.name_item, items.price, carts.total_item, items.rating, restaurants.name_rest FROM carts INNER JOIN items ON carts.id_item=items.id_item INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant  INNER JOIN users ON carts.id_user=users.id_user WHERE carts.id_user=?',[id],(err,result1,field)=>{
+			mysql.execute('SELECT carts.id_cart, users.name,items.image,items.id_item, items.name_item, items.price, carts.total_item, items.rating, restaurants.name_rest FROM carts INNER JOIN items ON carts.id_item=items.id_item INNER JOIN restaurants ON items.id_restaurant=restaurants.id_restaurant  INNER JOIN users ON carts.id_user=users.id_user WHERE carts.id_user=?',[id],(err,result1,field)=>{
                 res.send({success:true,data:result1, Subtotal: subtotal})
 			})
 		}) 
@@ -80,5 +80,15 @@ router.delete('/:id',auth,(req,res)=>{
             res.send({success:true,data:result})
         })
 })
+
+router.delete('/delete/',(req, res)=>{
+    const {id_item, id_user} = req.body
+    console.log(id_user,id_item)
+    const sql = `DELETE from carts WHERE id_item = ? AND id_user = ?`
+    mysql.execute(sql, [id_item, id_user], (err, result, field)=>{
+        res.send(result)
+    })
+})
+
 
 module.exports =router

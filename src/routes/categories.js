@@ -31,14 +31,14 @@ router.get('/:id',(req, res)=>{
     const {id} = req.params
     mysql.execute(detail,[id],(err,result, field)=>{
         console.log(err)
-        res.send({succes:true,data:result})
+        res.send({success:true,data:result})
     })
 })
 
 router.get('/',(req, res)=>{
     mysql.execute(showall,[],(err,result, field)=>{
         console.log(err)
-        res.send({succes:true,data:result})
+        res.send({success:true,data:result})
     })
 })
 
@@ -51,7 +51,7 @@ router.post('/',upload.single('image'),(req,res)=>{
     mysql.execute(add,
         [name_category, image,created_on,updated_on],
         (err,result,field)=>{
-        res.send({succes:true,data:result})
+        res.send({success:true,data:result})
     })
 })
 

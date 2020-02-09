@@ -176,7 +176,7 @@ router.get('/', (req, res) => {
   
     if (query.page) {
       const offset = (Number(query.page) * 8) - 8;
-      page = `LIMIT 6 OFFSET ${offset}`;
+      page = `LIMIT 8 OFFSET ${offset}`;
       fullUrl += `page=${query.page}&`;
     } else {
       query.page = 1;
